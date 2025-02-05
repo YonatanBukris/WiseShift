@@ -6,7 +6,7 @@ import { AssessmentFormData } from '../components/forms/AssessmentForm';
 const API_URL = import.meta.env.VITE_API_URL;
 
 const api: AxiosInstance = axios.create({
-  baseURL: API_URL,
+  baseURL: `${API_URL}/api`,
 });
 
 api.interceptors.request.use((config) => {
@@ -35,15 +35,10 @@ interface AuthResponse extends ApiResponse<IUser> {
 }
 
 export const authAPI = {
-  register: async (userData: RegisterData): Promise<AuthResponse> => {
-    const response = await api.post('/auth/register', userData);
-    return response.data;
-  },
-
-  login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const response = await api.post('/auth/login', credentials);
-    return response.data;
-  },
+  register: (data: RegisterData) => 
+    axios.post(`${API_URL}/api/auth/register`, data),
+  login: (data: LoginCredentials) => 
+    axios.post(`${API_URL}/api/auth/login`, data),
 };
 
 export const dashboardAPI = {
