@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
-import User from "../models/User";
-import AssessmentForm from "../models/AssessmentForm";
-import { ApiResponse } from "../types/api";
-import { ManagerDashboardData, EmployeeDashboardData } from "../types/models";
-import { IUser } from "../types/models";
+import User from "../models/User.js";
+import AssessmentForm from "../models/AssessmentForm.js";
+import { ApiResponse } from "../types/api.js";
+import { ManagerDashboardData, EmployeeDashboardData } from "../types/models.js";
+import { IUser } from "../types/models.js";
 import { Types } from "mongoose";
+
 
 export const managerDashboard = async (
   req: Request,

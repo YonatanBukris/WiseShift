@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { IAssessmentForm } from "../types/models";
+import { IAssessmentForm } from "../types/models.js";
 
 const AssessmentFormSchema = new Schema<IAssessmentForm>({
   employee: { type: Schema.Types.ObjectId, ref: "User", required: true },

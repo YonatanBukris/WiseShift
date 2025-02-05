@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
-import AssessmentForm from "../models/AssessmentForm";
-import User from "../models/User";
-import { ApiResponse } from "../types/api";
+import AssessmentForm from "../models/AssessmentForm.js";
+import User from "../models/User.js";
+import { ApiResponse } from "../types/api.js";
+
 
 export const submitAssessmentForm = async (
   req: Request,

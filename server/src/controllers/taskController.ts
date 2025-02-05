@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import Task from "../models/Task";
-import { ApiResponse } from "../types/api";
-import { ITask } from "../types/models";
+import Task from "../models/Task.js";
+import { ApiResponse } from "../types/api.js";
+import { ITask } from "../types/models.js";
 
 // Create new task
 export const createTask = async (
@@ -64,11 +64,12 @@ export const getTasks = async (
 
     res.json({
       success: true,
-      data: tasks,
+      data: tasks as ITask[],
     });
   } catch (error) {
     res.status(500).json({
       success: false,
+
       message: "Error fetching tasks",
       error: error instanceof Error ? error.message : "Unknown error",
     });

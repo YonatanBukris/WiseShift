@@ -3,12 +3,12 @@ import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { config } from "dotenv";
-import connectDB from "./config/database";
-import authRoutes from "./routes/authRoutes";
-import { protect } from "./middleware/auth";
-import dashboardRoutes from "./routes/dashboardRoutes";
-import assessmentRoutes from "./routes/assessmentRoutes";
-import taskRoutes from "./routes/taskRoutes";
+import connectDB from "./config/database.js";
+import authRoutes from "./routes/authRoutes.js";
+import { protect } from "./middleware/auth.js";
+import dashboardRoutes from "./routes/dashboardRoutes.js";
+import assessmentRoutes from "./routes/assessmentRoutes.js";
+import taskRoutes from "./routes/taskRoutes.js";
 
 // Load env vars
 config();

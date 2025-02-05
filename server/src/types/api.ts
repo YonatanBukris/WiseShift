@@ -1,4 +1,4 @@
-import { IUser } from './models';
+import { IUser } from './models.js';
 
 export interface ApiResponse<T = any> {
   success: boolean;

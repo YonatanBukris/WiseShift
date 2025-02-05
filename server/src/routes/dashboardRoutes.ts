@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { managerDashboard, employeeDashboard } from "../controllers/dashboardController";
-import { protect, requireRole } from "../middleware/auth";
+import { managerDashboard, employeeDashboard } from "../controllers/dashboardController.js";
+import { protect, requireRole } from "../middleware/auth.js";
 
 const router = Router();
 

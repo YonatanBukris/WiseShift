@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import { IUser } from "./models";
+import { IUser } from "./models.js";
 
 export interface ServerToClientEvents {
   userUpdate: (user: IUser) => void;

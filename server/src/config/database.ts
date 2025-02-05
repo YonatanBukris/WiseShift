@@ -5,13 +5,7 @@ config();
 
 const connectDB = async (): Promise<void> => {
   try {
-    const mongoUri = process.env.MONGODB_URI;
-    
-    if (!mongoUri) {
-      throw new Error('MONGODB_URI is not defined in environment variables');
-    }
-
-    const conn = await mongoose.connect(mongoUri);
+    const conn = await mongoose.connect(process.env.MONGODB_URI as string);
     
     // Drop all indexes on startup (only during development)
     if (process.env.NODE_ENV === 'development') {
