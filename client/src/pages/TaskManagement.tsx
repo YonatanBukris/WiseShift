@@ -10,16 +10,13 @@ import { useAuth } from "../contexts/AuthContext";
 export const TaskManagement = () => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<ITask[]>([]);
-  const [employees, setEmployees] = useState<
-    Array<{ id: string; name: string }>
-  >([]);
+  const [employees] = useState<Array<{ id: string; name: string }>>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     fetchTasks();
-    // TODO: Fetch employees list for task assignment
   }, []);
 
   const fetchTasks = async () => {
