@@ -47,9 +47,15 @@ const Register = () => {
     e.preventDefault();
     try {
       console.log("Submitting form data:", formData);
-      const data = await authAPI.register(formData);
-      login(data.data!, data.token);
-      navigate("/dashboard");
+      const response = await authAPI.register(formData);
+      if (response.data.success) {
+        localStorage.setItem("token", response.data.token);
+        login(response.data.data!, response.data.token);
+        navigate("/dashboard");
+      } else {
+        console.error("Registration failed:", response.data);
+        setError(response.data.message || "An error occurred");
+      }
     } catch (err: any) {
       console.error("Registration error:", err);
       setError(err.response?.data?.message || "An error occurred");

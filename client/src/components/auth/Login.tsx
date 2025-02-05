@@ -29,9 +29,12 @@ const Login = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      const data = await authAPI.login(formData);
-      login(data.data!, data.token);
-      navigate("/dashboard");
+      const response = await authAPI.login(formData);
+      if (response.data.success) {
+        localStorage.setItem("token", response.data.token);
+        login(response.data.data!, response.data.token);
+        navigate("/dashboard");
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || "An error occurred");
     }

@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { ApiResponse } from '../types/api';
 import { IUser, ManagerDashboardData, EmployeeDashboardData, ITask } from '../types/models';
 import { AssessmentFormData } from '../components/forms/AssessmentForm';
@@ -35,9 +35,9 @@ interface AuthResponse extends ApiResponse<IUser> {
 }
 
 export const authAPI = {
-  register: (data: RegisterData) => 
+  register: async (data: RegisterData): Promise<AxiosResponse<AuthResponse>> => 
     axios.post(`${API_URL}/api/auth/register`, data),
-  login: (data: LoginCredentials) => 
+  login: async (data: LoginCredentials): Promise<AxiosResponse<AuthResponse>> => 
     axios.post(`${API_URL}/api/auth/login`, data),
 };
 
