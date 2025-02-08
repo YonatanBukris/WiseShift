@@ -1,7 +1,12 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { ApiResponse } from '../types/api';
-import { IUser, ManagerDashboardData, EmployeeDashboardData, ITask } from '../types/models';
-import { AssessmentFormData } from '../components/forms/AssessmentForm';
+import axios, { AxiosInstance, AxiosResponse } from "axios";
+import { ApiResponse } from "../types/api";
+import {
+  IUser,
+  ManagerDashboardData,
+  EmployeeDashboardData,
+  ITask,
+} from "../types/models";
+import { AssessmentFormData } from "../components/forms/AssessmentForm";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -10,7 +15,7 @@ const api: AxiosInstance = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -35,27 +40,31 @@ interface AuthResponse extends ApiResponse<IUser> {
 }
 
 export const authAPI = {
-  register: async (data: RegisterData): Promise<AxiosResponse<AuthResponse>> => 
-    api.post('/auth/register', data),
-  login: async (data: LoginCredentials): Promise<AxiosResponse<AuthResponse>> => 
-    api.post('/auth/login', data),
+  register: async (data: RegisterData): Promise<AxiosResponse<AuthResponse>> =>
+    api.post("/auth/register", data),
+  login: async (data: LoginCredentials): Promise<AxiosResponse<AuthResponse>> =>
+    api.post("/auth/login", data),
 };
 
 export const dashboardAPI = {
   getManagerDashboard: async (): Promise<ApiResponse<ManagerDashboardData>> => {
-    const response = await api.get('/dashboard/manager');
+    const response = await api.get("/dashboard/manager");
     return response.data;
   },
 
-  getEmployeeDashboard: async (): Promise<ApiResponse<EmployeeDashboardData>> => {
-    const response = await api.get('/dashboard/employee');
+  getEmployeeDashboard: async (): Promise<
+    ApiResponse<EmployeeDashboardData>
+  > => {
+    const response = await api.get("/dashboard/employee");
     return response.data;
-  }
+  },
 };
 
 export const assessmentAPI = {
-  submitForm: async (formData: AssessmentFormData): Promise<ApiResponse<void>> => {
-    const response = await api.post('/assessment/submit', formData);
+  submitForm: async (
+    formData: AssessmentFormData
+  ): Promise<ApiResponse<void>> => {
+    const response = await api.post("/assessment/submit", formData);
     return response.data;
   },
 };
@@ -63,7 +72,7 @@ export const assessmentAPI = {
 export interface CreateTaskData {
   title: string;
   description?: string;
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  priority: "low" | "medium" | "high" | "critical";
   department: string;
   assignedTo?: string;
   deadline?: Date;
@@ -78,16 +87,19 @@ interface TaskFilters {
 
 export const taskAPI = {
   createTask: async (taskData: CreateTaskData): Promise<ApiResponse<ITask>> => {
-    const response = await api.post('/tasks', taskData);
+    const response = await api.post("/tasks", taskData);
     return response.data;
   },
 
   getTasks: async (filters?: TaskFilters): Promise<ApiResponse<ITask[]>> => {
-    const response = await api.get('/tasks', { params: filters });
+    const response = await api.get("/tasks", { params: filters });
     return response.data;
   },
 
-  updateTask: async (id: string, updates: Partial<ITask>): Promise<ApiResponse<ITask>> => {
+  updateTask: async (
+    id: string,
+    updates: Partial<ITask>
+  ): Promise<ApiResponse<ITask>> => {
     const response = await api.patch(`/tasks/${id}`, updates);
     return response.data;
   },
@@ -103,41 +115,53 @@ export const taskAPI = {
   },
 
   getAvailableEmployees: async () => {
-    const response = await api.get('/tasks/available-employees');
+    const response = await api.get("/tasks/available-employees");
     return response.data;
   },
 };
 
 export const emergencyAPI = {
-  activateEmergency: async (description: string, areas: string[]): Promise<ApiResponse<void>> => {
-    const response = await api.post('/emergency/activate', { description, areas });
+  activateEmergency: async (
+    description: string,
+    areas: string[]
+  ): Promise<ApiResponse<void>> => {
+    const response = await api.post("/emergency/activate", {
+      description,
+      areas,
+    });
     return response.data;
   },
 
   getEmergencyTasks: async (): Promise<ApiResponse<EmergencyTask[]>> => {
-    const response = await api.get('/emergency/tasks');
+    const response = await api.get("/emergency/tasks");
     return response.data;
     console.log();
-    
   },
 
   assignTask: async (taskId: string, employeeId: string) => {
-    const response = await api.post(`/emergency/tasks/${taskId}/assign`, { employeeId });
+    const response = await api.post(`/emergency/tasks/${taskId}/assign`, {
+      employeeId,
+    });
     return response.data;
   },
 
   getAvailableEmployees: async () => {
-    const response = await api.get('/emergency/available-employees');
+    const response = await api.get("/emergency/available-employees");
     return response.data;
   },
 
-  updateTaskStatus: async (taskId: string, status: string): Promise<ApiResponse<void>> => {
-    const response = await api.patch(`/emergency/tasks/${taskId}/status`, { status });
+  updateTaskStatus: async (
+    taskId: string,
+    status: string
+  ): Promise<ApiResponse<void>> => {
+    const response = await api.patch(`/emergency/tasks/${taskId}/status`, {
+      status,
+    });
     return response.data;
   },
 
   deactivateEmergency: async () => {
-    const response = await api.post('/emergency/deactivate');
+    const response = await api.post("/emergency/deactivate");
     return response.data;
   },
 };
@@ -152,6 +176,4 @@ interface EmergencyTask {
   location: string;
 }
 
-
-
-export default api; 
+export default api;
