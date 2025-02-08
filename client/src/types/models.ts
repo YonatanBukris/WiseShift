@@ -2,11 +2,10 @@ export interface IUser {
   _id: string;
   name: string;
   email: string;
-  role: 'manager' | 'employee' | 'guest';
+  role: "manager" | "employee" | "guest";
   department: string;
   phoneNumber?: string;
   emergencyContact?: {
-
     name: string;
     relationship: string;
     phoneNumber: string;
@@ -79,7 +78,7 @@ export interface EmployeeDashboardData {
   emergencyTasks: ITask[];
   recentActivity?: Array<{
     timestamp: Date;
-    type: 'status' | 'task';
+    type: "status" | "task";
     message: string;
   }>;
 }
@@ -88,12 +87,20 @@ export interface ITask {
   _id: string;
   title: string;
   description?: string;
-  status: 'pending' | 'inProgress' | 'completed' | 'transferred' | 'cancelled' | 'assigned';
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  assignedTo?: {
-    _id: string;
-    name: string;
-  };
+  status:
+    | "pending"
+    | "inProgress"
+    | "completed"
+    | "transferred"
+    | "cancelled"
+    | "assigned";
+  priority: "low" | "medium" | "high" | "critical";
+  assignedTo?:
+    | {
+        _id: string;
+        name: string;
+      }
+    | string;
   createdBy: string;
   department: string;
   deadline?: Date;
@@ -101,7 +108,7 @@ export interface ITask {
   actualHours?: number;
   dependencies: Array<{
     task: string;
-    type: 'blocks' | 'blocked_by';
+    type: "blocks" | "blocked_by";
   }>;
   comments: Array<{
     text: string;
@@ -126,9 +133,9 @@ export interface EmergencyTask {
   _id: string;
   title: string;
   description: string;
-  criticality: 'low' | 'medium' | 'high' | 'critical';
-  status: 'pending' | 'inProgress' | 'completed' | 'assigned';
+  criticality: "low" | "medium" | "high" | "critical";
+  status: "pending" | "inProgress" | "completed" | "assigned";
   assignedTo?: string;
   location: string;
   isEmergencyTask: boolean;
-} 
+}

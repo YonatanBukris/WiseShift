@@ -9,9 +9,15 @@ import {
 import { AssessmentFormData } from "../components/forms/AssessmentForm";
 
 const API_URL = import.meta.env.VITE_API_URL;
+if (!API_URL) {
+  console.error("API URL not configured");
+}
 
 const api: AxiosInstance = axios.create({
   baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 api.interceptors.request.use((config) => {

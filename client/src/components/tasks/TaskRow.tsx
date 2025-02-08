@@ -52,7 +52,9 @@ export const TaskRow = ({ task, onEdit, onDelete, onAssign }: Props) => {
       </TableCell>
       {isManager && (
         <TableCell align="right">
-          {task.assignedTo?.name || "לא משויך"}
+          {typeof task.assignedTo === "string"
+            ? "לא משויך"
+            : task.assignedTo?.name || "לא משויך"}
         </TableCell>
       )}
 
