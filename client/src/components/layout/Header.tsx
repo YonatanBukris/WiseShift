@@ -2,7 +2,7 @@ import { AppBar, Box, IconButton, Toolbar, Typography } from "@mui/material";
 import { LogoutRounded as LogoutIcon } from "@mui/icons-material";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/logo.png";
+const logo = "/assets/logo.png";
 import { DRAWER_WIDTH } from "./Sidebar";
 
 export const Header = () => {
