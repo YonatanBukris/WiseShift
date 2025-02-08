@@ -1,39 +1,29 @@
-import { useState, useEffect } from "react";
-import { Box, Button, Typography, Alert, Snackbar } from "@mui/material";
+import { useState } from "react";
+import { Box, Button, Typography, Alert, Snackbar, Paper } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
 import { TaskForm } from "../components/tasks/TaskForm";
 import { TaskList } from "../components/tasks/TaskList";
 import { taskAPI, CreateTaskData } from "../services/api";
 import { ITask } from "../types/models";
 import { useAuth } from "../contexts/AuthContext";
+import { useTask } from "../contexts/TaskContext";
 
 export const TaskManagement = () => {
   const { user } = useAuth();
-  const [tasks, setTasks] = useState<ITask[]>([]);
+  const { tasks, emergencyTasks, fetchTasks } = useTask();
   const [employees] = useState<Array<{ id: string; name: string }>>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const isManager = user?.role === "manager";
 
-  useEffect(() => {
-    fetchTasks();
-  }, []);
+  // Combine both task types
+  const allTasks = [...tasks, ...emergencyTasks];
 
-  const fetchTasks = async () => {
-    try {
-      const response = await taskAPI.getTasks();
-      if (response.success && response.data) {
-        setTasks(response.data || []);
-      }
-    } catch (err) {
-      setError("Failed to fetch tasks");
-      console.error(err);
-    }
-  };
+  // Also log the assignedTo values to check the comparison
 
   const handleCreateTask = async (taskData: CreateTaskData) => {
     try {
-      console.log("Sending task data:", taskData);
       const response = await taskAPI.createTask(taskData);
       if (response.success && response.data) {
         setSuccessMessage("Task created successfully");
@@ -41,11 +31,7 @@ export const TaskManagement = () => {
         setIsFormOpen(false);
       }
     } catch (error: any) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : error.response?.data?.message || "Unknown error";
-      setError(`Failed to create task: ${errorMessage}`);
+      setError(`Failed to create task: ${error.message}`);
       console.error("Task creation error:", error);
     }
   };
@@ -86,32 +72,116 @@ export const TaskManagement = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3,
-        }}
-      >
-        <Typography variant="h5">ניהול משימות</Typography>
-        {user?.role === "manager" && (
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setIsFormOpen(true)}
+      {/* Stats Section - Similar to the top cards in the image */}
+      <Box sx={{ display: "flex", gap: 3, mb: 4 }}>
+        <Paper
+          sx={{
+            flex: 1,
+            p: 2,
+            display: "flex",
+            alignItems: "center",
+            backgroundColor: "background.paper",
+            borderRadius: 2,
+          }}
+        >
+          <Box>
+            <Typography variant="h4" color="primary.dark">
+              {tasks.length + emergencyTasks.length}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              משימות פעילות
+            </Typography>
+          </Box>
+        </Paper>
+
+        <Paper
+          sx={{
+            flex: 1,
+            p: 2,
+            display: "flex",
+            alignItems: "center",
+            backgroundColor: "background.paper",
+            borderRadius: 2,
+          }}
+        >
+          <Box>
+            <Typography variant="h4" color="primary.dark">
+              {tasks.filter((t) => t.status === "completed").length}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              משימות שהושלמו
+            </Typography>
+          </Box>
+        </Paper>
+
+        {isManager && (
+          <Paper
+            sx={{
+              flex: 1,
+              p: 2,
+              display: "flex",
+              alignItems: "center",
+              backgroundColor: "background.paper",
+              borderRadius: 2,
+            }}
           >
-            משימה חדשה
-          </Button>
+            <Box>
+              <Typography variant="h4" color="primary.dark">
+                {tasks.filter((t) => !t.assignedTo).length +
+                  emergencyTasks.filter((t) => !t.assignedTo).length}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                משימות לא משובצות
+              </Typography>
+            </Box>
+          </Paper>
         )}
       </Box>
 
-      <TaskList
-        tasks={tasks}
-        onEdit={handleEditTask}
-        onDelete={handleDeleteTask}
-        onStatusChange={handleStatusChange}
-      />
+      {/* Main Content Section */}
+      <Paper
+        sx={{
+          p: 3,
+          backgroundColor: "background.paper",
+          borderRadius: 2,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 3,
+          }}
+        >
+          <Typography variant="h5" color="primary.dark">
+            ניהול משימות
+          </Typography>
+          {isManager && (
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setIsFormOpen(true)}
+              sx={{
+                backgroundColor: "primary.main",
+                "&:hover": {
+                  backgroundColor: "primary.light",
+                },
+              }}
+            >
+              משימה חדשה
+            </Button>
+          )}
+        </Box>
+
+        <TaskList
+          tasks={allTasks}
+          onEdit={handleEditTask}
+          onDelete={handleDeleteTask}
+          onStatusChange={handleStatusChange}
+          fetchTasks={fetchTasks}
+        />
+      </Paper>
 
       <TaskForm
         open={isFormOpen}

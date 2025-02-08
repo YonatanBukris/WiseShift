@@ -5,6 +5,8 @@ import { ApiResponse } from "../types/api.js";
 import { ManagerDashboardData, EmployeeDashboardData } from "../types/models.js";
 import { IUser } from "../types/models.js";
 import { Types } from "mongoose";
+import Task from "../models/Task.js";
+import EmergencyTask from "../models/EmergencyTask.js";
 
 
 export const managerDashboard = async (
@@ -68,42 +70,46 @@ export const managerDashboard = async (
   }
 };
 
-export const employeeDashboard = async (
-  req: Request,
-  res: Response<ApiResponse<EmployeeDashboardData>>
-) => {
+export const getEmployeeDashboard = async (req: Request, res: Response) => {
   try {
     const user = req.user!;
-
-    // Check if form was submitted today
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
+    console.log("Employee ID:", user._id);
     
-    const todayForm = await AssessmentForm.findOne({
-      employee: user._id,
-      createdAt: { $gte: startOfDay }
+    // Get tasks assigned to this employee
+    const assignedTasks = await Task.find({ assignedTo: user._id });
+    console.log("Found assigned tasks:", assignedTasks);
+    
+    // Get emergency tasks assigned to this employee
+    const assignedEmergencyTasks = await EmergencyTask.find({ 
+      assignedTo: user._id,
+      isActive: true 
     });
+    console.log("Found emergency tasks:", assignedEmergencyTasks);
 
     const dashboardData: EmployeeDashboardData = {
       personalStats: {
         department: user.department,
         canWorkAsUsual: user.status.canWorkAsUsual,
         availableHours: user.status.availableHours,
-        currentTasks: 0,
-        completedTasks: 0,
-        formSubmittedToday: !!todayForm
-      }
+        currentTasks: assignedTasks.length,
+        completedTasks: assignedTasks.filter(t => t.status === 'completed').length,
+        emergencyTasks: assignedEmergencyTasks.length,
+        formSubmittedToday: false // You might want to check this from forms collection
+      },
+      tasks: assignedTasks,
+      emergencyTasks: assignedEmergencyTasks
     };
 
     res.json({
       success: true,
       data: dashboardData
     });
+
   } catch (error) {
+    console.error('Error fetching employee dashboard:', error);
     res.status(500).json({
       success: false,
-      message: "Error fetching employee dashboard",
-      error: error instanceof Error ? error.message : "Unknown error"
+      message: 'Failed to fetch dashboard data'
     });
   }
 }; 

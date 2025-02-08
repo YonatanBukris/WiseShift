@@ -61,6 +61,7 @@ export interface ITask extends Document {
   updatedAt: Date;
 }
 
+
 export interface IAssessmentForm extends Document {
   employee: Types.ObjectId;
   submittedBy: Types.ObjectId;
@@ -120,6 +121,7 @@ export interface EmployeeDashboardData {
     availableHours: number;
     currentTasks: number;
     completedTasks: number;
+    emergencyTasks: number;
     formSubmittedToday?: boolean;
   };
   recentActivity?: Array<{
@@ -127,4 +129,19 @@ export interface EmployeeDashboardData {
     type: 'status' | 'task';
     message: string;
   }>;
+  tasks: ITask[];
+  emergencyTasks: EmergencyTask[];
+}
+
+export interface EmergencyTask extends Document {
+  _id: Types.ObjectId;
+  title: string;
+  description?: string;
+  criticality: 'critical' | 'high' | 'medium' | 'low';
+  status: 'pending' | 'assigned' | 'inProgress' | 'completed';
+  assignedTo?: Types.ObjectId;
+  location?: string;
+  isActive: boolean;
+  requiredSkills?: string[];
+  estimatedTime?: number;
 } 

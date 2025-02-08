@@ -18,6 +18,7 @@ import {
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import logo from "../../assets/logo.png"; // Import the logo
 
 const DRAWER_WIDTH = 240;
 
@@ -54,9 +55,24 @@ export const Layout = ({ children }: LayoutProps) => {
         sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
       >
         <Toolbar sx={{ justifyContent: "space-between" }}>
-          <Typography variant="h6" noWrap>
-            מערכת ניהול משימות
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Box
+              component="img"
+              src={logo}
+              alt="WiseShift Logo"
+              sx={{
+                height: 40,
+                mr: 2,
+                transition: "filter 0.2s ease-in-out",
+                "&:hover": {
+                  filter: "hue-rotate(170deg) saturate(150%)", // Subtle color shift on hover
+                },
+              }}
+            />
+            <Typography variant="h6" noWrap>
+              מערכת ניהול משימות
+            </Typography>
+          </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Typography>{user?.name}</Typography>
             <IconButton color="inherit" onClick={handleLogout}>

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Task from "../models/Task.js";
 import { ApiResponse } from "../types/api.js";
 import { ITask } from "../types/models.js";
+import User from "../models/User.js";
 
 // Create new task
 export const createTask = async (
@@ -45,33 +46,44 @@ export const createTask = async (
 };
 
 // Get tasks (with filters)
-export const getTasks = async (
-  req: Request,
-  res: Response<ApiResponse<ITask[]>>
-) => {
+export const getTasks = async (req: Request, res: Response) => {
   try {
-    const { department, status, assignedTo } = req.query;
-    const filter: any = {};
+    const { assignedTo } = req.query;
+    const user = req.user!;
 
-    if (department) filter.department = department;
-    if (status) filter.status = status;
-    if (assignedTo) filter.assignedTo = assignedTo;
+    let query = {};
+    
+    // If employee, only return their assigned tasks
+    if (user.role === 'employee') {
+      query = { assignedTo: user._id };
+    }
+    // If manager with filter, apply the filter
+    else if (user.role === 'manager' && assignedTo) {
+      query = { assignedTo };
+    }
 
-    const tasks = await Task.find(filter)
-      .populate("assignedTo", "name")
-      .populate("createdBy", "name")
-      .sort({ createdAt: -1 });
+    // First get the tasks
+    const tasks = await Task.find(query)
+      .populate({
+        path: 'assignedTo',
+        select: 'name email department',
+        model: 'User'
+      })
+      .sort({ createdAt: -1 })
+      .exec();
+
+    // Transform the data to ensure consistent format for both roles
+   
 
     res.json({
       success: true,
-      data: tasks as ITask[],
+      data: tasks
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-
-      message: "Error fetching tasks",
-      error: error instanceof Error ? error.message : "Unknown error",
+      message: "Failed to fetch tasks",
+      error: error instanceof Error ? error.message : "Unknown error"
     });
   }
 };
@@ -148,6 +160,67 @@ export const deleteTask = async (
     res.status(500).json({
       success: false,
       message: "Error deleting task",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+export const getAvailableEmployees = async (req: Request, res: Response) => {
+  try {
+    const employees = await User.find({
+      role: "employee",
+      "status.canWorkAsUsual": true,
+    }).select("_id name");
+
+    res.json({
+      success: true,
+      data: employees,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch available employees",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+export const assignTask = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { employeeId } = req.body;
+
+    const task = await Task.findByIdAndUpdate(
+      id,
+      {
+        assignedTo: employeeId,
+        status: "assigned",
+      },
+      { new: true }
+    )
+    .populate({
+      path: 'assignedTo',
+      select: 'name email department',
+      model: 'User'
+    })
+    .exec();
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Task assigned successfully",
+      data: task,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to assign task",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }

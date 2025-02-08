@@ -1,33 +1,20 @@
 import { useState } from "react";
-import {
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  IconButton,
-  Chip,
-  TablePagination,
-  Box,
-  Typography,
-  Tooltip,
-} from "@mui/material";
-import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  CheckCircle as CheckCircleIcon,
-  Schedule as ScheduleIcon,
-} from "@mui/icons-material";
+import { Table, TableContainer, TablePagination } from "@mui/material";
+
 import { ITask } from "../../types/models";
-import { format } from "date-fns";
+import { useAuth } from "../../contexts/AuthContext";
+import { useTask } from "../../contexts/TaskContext";
+import { emergencyAPI, taskAPI } from "../../services/api";
+import { TaskTableHeader } from "./TaskTableHeader";
+import { TaskTableBody } from "./TaskTableBody";
+import { AssignTaskDialog } from "./AssignTaskDialog";
 
 interface TaskListProps {
   tasks: ITask[];
   onEdit: (task: ITask) => void;
   onDelete: (taskId: string) => void;
   onStatusChange: (taskId: string, newStatus: ITask["status"]) => void;
+  fetchTasks: () => Promise<void>;
 }
 
 export const TaskList = ({
@@ -35,178 +22,90 @@ export const TaskList = ({
   onEdit,
   onDelete,
   onStatusChange,
+  fetchTasks,
 }: TaskListProps) => {
+  const { user } = useAuth();
+  const isManager = user?.role === "manager";
+  const { emergencyTasks } = useTask();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<string>("");
 
-  const getPriorityColor = (priority: ITask["priority"]) => {
-    switch (priority) {
-      case "critical":
-        return "error";
-      case "high":
-        return "warning";
-      case "medium":
-        return "info";
-      case "low":
-        return "success";
-      default:
-        return "default";
-    }
+  const handleChangePage = (_: unknown, newPage: number) => {
+    setPage(newPage);
   };
 
-  const getStatusColor = (status: ITask["status"]) => {
-    switch (status) {
-      case "completed":
-        return "success";
-      case "inProgress":
-        return "info";
-      case "pending":
-        return "warning";
-      case "cancelled":
-        return "error";
-      default:
-        return "default";
-    }
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
-  const getStatusLabel = (status: ITask["status"]) => {
-    switch (status) {
-      case "completed":
-        return "הושלם";
-      case "inProgress":
-        return "בביצוע";
-      case "pending":
-        return "ממתין";
-      case "cancelled":
-        return "בוטל";
-      case "transferred":
-        return "הועבר";
-      default:
-        return status;
+  // Sort tasks: emergency first, then by priority
+  const sortedTasks = [...tasks].sort((a, b) => {
+    if (a.isEmergencyTask && !b.isEmergencyTask) return -1;
+    if (!a.isEmergencyTask && b.isEmergencyTask) return 1;
+
+    const priorityOrder = {
+      critical: 0,
+      high: 1,
+      medium: 2,
+      low: 3,
+    };
+
+    return priorityOrder[a.priority] - priorityOrder[b.priority];
+  });
+
+  const handleAssign = async () => {
+    if (selectedTask && selectedEmployee) {
+      try {
+        if (selectedTask.isEmergencyTask) {
+          await emergencyAPI.assignTask(selectedTask._id, selectedEmployee);
+        } else {
+          await taskAPI.assignTask(selectedTask._id, selectedEmployee);
+        }
+        await fetchTasks();
+        setSelectedTask(null);
+        setSelectedEmployee("");
+      } catch (error) {
+        console.error("Error assigning task:", error);
+      }
     }
   };
 
   return (
-    <Paper>
+    <>
       <TableContainer>
         <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>כותרת</TableCell>
-              <TableCell>דחיפות</TableCell>
-              <TableCell>סטטוס</TableCell>
-              <TableCell>תאריך יעד</TableCell>
-              <TableCell>שעות מוערכות</TableCell>
-              <TableCell>פעולות</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {tasks
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((task) => (
-                <TableRow key={task._id}>
-                  <TableCell>
-                    <Typography variant="body1">{task.title}</Typography>
-                    {task.description && (
-                      <Typography
-                        variant="body2"
-                        color="textSecondary"
-                        sx={{
-                          maxWidth: 300,
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
-                        {task.description}
-                      </Typography>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={task.priority}
-                      color={getPriorityColor(task.priority)}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={getStatusLabel(task.status)}
-                      color={getStatusColor(task.status)}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {task.deadline
-                      ? format(new Date(task.deadline), "dd/MM/yyyy HH:mm")
-                      : "-"}
-                  </TableCell>
-                  <TableCell>{task.estimatedHours || "-"}</TableCell>
-                  <TableCell>
-                    <Box sx={{ display: "flex", gap: 1 }}>
-                      <Tooltip title="ערוך">
-                        <IconButton
-                          size="small"
-                          onClick={() => onEdit(task)}
-                          color="primary"
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      {task.status !== "completed" && (
-                        <Tooltip title="סמן כהושלם">
-                          <IconButton
-                            size="small"
-                            onClick={() =>
-                              onStatusChange(task._id, "completed")
-                            }
-                            color="success"
-                          >
-                            <CheckCircleIcon />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                      {task.status === "pending" && (
-                        <Tooltip title="התחל טיפול">
-                          <IconButton
-                            size="small"
-                            onClick={() =>
-                              onStatusChange(task._id, "inProgress")
-                            }
-                            color="info"
-                          >
-                            <ScheduleIcon />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                      <Tooltip title="מחק">
-                        <IconButton
-                          size="small"
-                          onClick={() => onDelete(task._id)}
-                          color="error"
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
+          <TaskTableHeader isManager={isManager} />
+          <TaskTableBody
+            tasks={sortedTasks}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onStatusChange={onStatusChange}
+            onAssign={(task) => setSelectedTask(task)}
+          />
         </Table>
+        <TablePagination
+          component="div"
+          count={sortedTasks.length}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage="שורות בעמוד"
+        />
       </TableContainer>
-      <TablePagination
-        component="div"
-        count={tasks.length}
-        page={page}
-        onPageChange={(_, newPage) => setPage(newPage)}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={(event) => {
-          setRowsPerPage(parseInt(event.target.value, 10));
-          setPage(0);
-        }}
-        labelRowsPerPage="שורות בעמוד"
+
+      <AssignTaskDialog
+        task={selectedTask}
+        onClose={() => setSelectedTask(null)}
+        onAssign={handleAssign}
       />
-    </Paper>
+    </>
   );
 };

@@ -1,11 +1,12 @@
 export interface IUser {
-  id: string;
+  _id: string;
   name: string;
   email: string;
   role: 'manager' | 'employee' | 'guest';
   department: string;
   phoneNumber?: string;
   emergencyContact?: {
+
     name: string;
     relationship: string;
     phoneNumber: string;
@@ -38,28 +39,30 @@ export interface TaskStats {
   active: number;
   completed: number;
   pending: number;
+  total: number;
   department: string;
 }
 
 export interface ManagerDashboardData {
-  employeeStats: DepartmentStats;
-  taskStats: TaskStats;
+  employeeStats: {
+    totalEmployees: number;
+    availableEmployees: number;
+    unavailableEmployees: number;
+    department: string;
+  };
+  taskStats: {
+    active: number;
+    completed: number;
+    pending: number;
+    total: number;
+    department: string;
+  };
   formStats: {
     submittedToday: number;
-    totalEmployees: number;
-    criticalCases: Array<{
-      employeeId: string;
-      name: string;
-      stressLevel: number;
-      physicallyInjured: boolean;
-      canWorkAsUsual: boolean;
-    }>;
+    totalSubmitted: number;
+    pendingReview: number;
+    total: number;
   };
-  recentUpdates?: Array<{
-    timestamp: Date;
-    type: 'status' | 'task';
-    message: string;
-  }>;
 }
 
 export interface EmployeeDashboardData {
@@ -69,8 +72,11 @@ export interface EmployeeDashboardData {
     availableHours: number;
     currentTasks: number;
     completedTasks: number;
-    formSubmittedToday?: boolean;
+    emergencyTasks: number;
+    formSubmittedToday: boolean;
   };
+  tasks: ITask[];
+  emergencyTasks: ITask[];
   recentActivity?: Array<{
     timestamp: Date;
     type: 'status' | 'task';
@@ -82,9 +88,12 @@ export interface ITask {
   _id: string;
   title: string;
   description?: string;
-  status: 'pending' | 'inProgress' | 'completed' | 'transferred' | 'cancelled';
+  status: 'pending' | 'inProgress' | 'completed' | 'transferred' | 'cancelled' | 'assigned';
   priority: 'low' | 'medium' | 'high' | 'critical';
-  assignedTo?: string;
+  assignedTo?: {
+    _id: string;
+    name: string;
+  };
   createdBy: string;
   department: string;
   deadline?: Date;
@@ -108,4 +117,18 @@ export interface ITask {
   }>;
   createdAt: Date;
   updatedAt: Date;
+  isEmergencyTask?: boolean;
+  criticality?: string;
+  location?: string;
+}
+
+export interface EmergencyTask {
+  _id: string;
+  title: string;
+  description: string;
+  criticality: 'low' | 'medium' | 'high' | 'critical';
+  status: 'pending' | 'inProgress' | 'completed' | 'assigned';
+  assignedTo?: string;
+  location: string;
+  isEmergencyTask: boolean;
 } 

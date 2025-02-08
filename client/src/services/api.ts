@@ -6,7 +6,7 @@ import { AssessmentFormData } from '../components/forms/AssessmentForm';
 const API_URL = import.meta.env.VITE_API_URL;
 
 const api: AxiosInstance = axios.create({
-  baseURL: `${API_URL}/api`,
+  baseURL: API_URL,
 });
 
 api.interceptors.request.use((config) => {
@@ -36,9 +36,9 @@ interface AuthResponse extends ApiResponse<IUser> {
 
 export const authAPI = {
   register: async (data: RegisterData): Promise<AxiosResponse<AuthResponse>> => 
-    axios.post(`${API_URL}/api/auth/register`, data),
+    api.post('/auth/register', data),
   login: async (data: LoginCredentials): Promise<AxiosResponse<AuthResponse>> => 
-    axios.post(`${API_URL}/api/auth/login`, data),
+    api.post('/auth/login', data),
 };
 
 export const dashboardAPI = {
@@ -95,7 +95,63 @@ export const taskAPI = {
   deleteTask: async (id: string): Promise<ApiResponse<void>> => {
     const response = await api.delete(`/tasks/${id}`);
     return response.data;
-  }
+  },
+
+  assignTask: async (taskId: string, employeeId: string) => {
+    const response = await api.post(`/tasks/${taskId}/assign`, { employeeId });
+    return response.data;
+  },
+
+  getAvailableEmployees: async () => {
+    const response = await api.get('/tasks/available-employees');
+    return response.data;
+  },
 };
+
+export const emergencyAPI = {
+  activateEmergency: async (description: string, areas: string[]): Promise<ApiResponse<void>> => {
+    const response = await api.post('/emergency/activate', { description, areas });
+    return response.data;
+  },
+
+  getEmergencyTasks: async (): Promise<ApiResponse<EmergencyTask[]>> => {
+    const response = await api.get('/emergency/tasks');
+    return response.data;
+    console.log();
+    
+  },
+
+  assignTask: async (taskId: string, employeeId: string) => {
+    const response = await api.post(`/emergency/tasks/${taskId}/assign`, { employeeId });
+    return response.data;
+  },
+
+  getAvailableEmployees: async () => {
+    const response = await api.get('/emergency/available-employees');
+    return response.data;
+  },
+
+  updateTaskStatus: async (taskId: string, status: string): Promise<ApiResponse<void>> => {
+    const response = await api.patch(`/emergency/tasks/${taskId}/status`, { status });
+    return response.data;
+  },
+
+  deactivateEmergency: async () => {
+    const response = await api.post('/emergency/deactivate');
+    return response.data;
+  },
+};
+
+interface EmergencyTask {
+  _id: string;
+  title: string;
+  description: string;
+  criticality: "critical" | "high" | "medium" | "low";
+  status: "pending" | "assigned" | "inProgress" | "completed";
+  assignedTo?: string;
+  location: string;
+}
+
+
 
 export default api; 

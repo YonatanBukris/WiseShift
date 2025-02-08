@@ -8,10 +8,10 @@ import {
   CardContent,
   Button,
 } from "@mui/material";
-import { dashboardAPI } from "../../services/api";
+import { dashboardAPI, assessmentAPI } from "../../services/api";
 import { EmployeeDashboardData } from "../../types/models";
 import { AssessmentForm, AssessmentFormData } from "../forms/AssessmentForm";
-import { assessmentAPI } from "../../services/api";
+import { StatisticsCircle } from "./StatisticsCircle";
 
 export const EmployeeDashboard = () => {
   const [dashboardData, setDashboardData] =
@@ -66,6 +66,45 @@ export const EmployeeDashboard = () => {
         </Typography>
       )}
 
+      {/* Circular Statistics Section */}
+      <Paper sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6" gutterBottom>
+          סטטיסטיקת משימות
+        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "space-around", py: 3 }}>
+          <StatisticsCircle
+            value={dashboardData?.personalStats.currentTasks || 0}
+            total={
+              (dashboardData?.personalStats.currentTasks || 0) +
+              (dashboardData?.personalStats.completedTasks || 0) +
+              (dashboardData?.personalStats.emergencyTasks || 0)
+            }
+            label="משימות רגילות"
+            color="#28a745"
+          />
+          <StatisticsCircle
+            value={dashboardData?.personalStats.completedTasks || 0}
+            total={
+              (dashboardData?.personalStats.currentTasks || 0) +
+              (dashboardData?.personalStats.completedTasks || 0) +
+              (dashboardData?.personalStats.emergencyTasks || 0)
+            }
+            label="משימות שהושלמו"
+            color="#0078d4"
+          />
+          <StatisticsCircle
+            value={dashboardData?.personalStats.emergencyTasks || 0}
+            total={
+              (dashboardData?.personalStats.currentTasks || 0) +
+              (dashboardData?.personalStats.completedTasks || 0) +
+              (dashboardData?.personalStats.emergencyTasks || 0)
+            }
+            label="משימות חירום"
+            color="#dc3545"
+          />
+        </Box>
+      </Paper>
+
       <Grid container spacing={3}>
         {/* Personal Status */}
         <Grid item xs={12} md={6}>
@@ -101,27 +140,6 @@ export const EmployeeDashboard = () => {
                 <Typography>
                   שעות זמינות:{" "}
                   {dashboardData?.personalStats.availableHours || 0}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Paper>
-        </Grid>
-
-        {/* Personal Tasks */}
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              המשימות שלי
-            </Typography>
-            <Card>
-              <CardContent>
-                <Typography>
-                  משימות פעילות:{" "}
-                  {dashboardData?.personalStats.currentTasks || 0}
-                </Typography>
-                <Typography>
-                  משימות שהושלמו:{" "}
-                  {dashboardData?.personalStats.completedTasks || 0}
                 </Typography>
               </CardContent>
             </Card>

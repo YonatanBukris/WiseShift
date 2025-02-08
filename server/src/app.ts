@@ -9,6 +9,7 @@ import { protect } from "./middleware/auth.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import assessmentRoutes from "./routes/assessmentRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
+import emergencyRoutes from "./routes/emergencyRoutes.js";
 
 // Load env vars
 config();
@@ -34,6 +35,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/assessment", assessmentRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use("/api/emergency", emergencyRoutes);
 
 // Protected route example
 app.get("/api/test", protect, (req, res) => {

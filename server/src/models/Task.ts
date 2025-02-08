@@ -14,7 +14,11 @@ const TaskSchema = new Schema<ITask>({
     enum: ['low', 'medium', 'high', 'critical'],
     default: 'medium'
   },
-  assignedTo: { type: Schema.Types.ObjectId, ref: 'User' },
+  assignedTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
   createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   department: { type: String, required: true },
   deadline: { type: Date },
