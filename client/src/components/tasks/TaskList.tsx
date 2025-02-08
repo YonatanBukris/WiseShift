@@ -3,7 +3,6 @@ import { Table, TableContainer, TablePagination } from "@mui/material";
 
 import { ITask } from "../../types/models";
 import { useAuth } from "../../contexts/AuthContext";
-import { useTask } from "../../contexts/TaskContext";
 import { emergencyAPI, taskAPI } from "../../services/api";
 import { TaskTableHeader } from "./TaskTableHeader";
 import { TaskTableBody } from "./TaskTableBody";
@@ -26,7 +25,6 @@ export const TaskList = ({
 }: TaskListProps) => {
   const { user } = useAuth();
   const isManager = user?.role === "manager";
-  const { emergencyTasks } = useTask();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);

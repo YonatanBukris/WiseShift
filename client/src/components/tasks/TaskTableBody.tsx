@@ -1,4 +1,4 @@
-import { TableBody, TableRow, TableCell } from "@mui/material";
+import { TableBody } from "@mui/material";
 import { TaskRow } from "./TaskRow";
 import { ITask } from "../../types/models";
 

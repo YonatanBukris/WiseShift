@@ -1,9 +1,5 @@
 import { TableHead, TableRow, TableCell } from "@mui/material";
 
-interface Props {
-  isManager: boolean;
-}
-
 export const TaskTableHeader = ({ isManager }: { isManager: boolean }) => {
   return (
     <TableHead>
