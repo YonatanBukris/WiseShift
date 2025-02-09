@@ -10,14 +10,30 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: ["https://wiseshift.onrender.com", "http://localhost:3000"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Mount all routes under /api
 app.use("/api", routes);
 
-// Also mount routes directly for backward compatibility
-app.use(routes);
+// Add a test endpoint
+app.get("/test", (req, res) => {
+  res.json({ message: "Server is running" });
+});
+
+// Add error handling middleware
+app.use((req, res) => {
+  console.log(`404 - Not Found: ${req.method} ${req.url}`);
+  res.status(404).json({
+    success: false,
+    message: `Route ${req.url} not found`,
+  });
+});
 
 // Connect to MongoDB
 mongoose

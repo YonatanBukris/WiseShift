@@ -10,7 +10,7 @@ import { AssessmentFormData } from "../components/forms/AssessmentForm";
 
 const API_URL = import.meta.env.VITE_API_URL;
 if (!API_URL) {
-  console.error("API URL not configured");
+  throw new Error("API URL not configured");
 }
 
 const api: AxiosInstance = axios.create({
@@ -18,9 +18,12 @@ const api: AxiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
+// Add request logging
 api.interceptors.request.use((config) => {
+  console.log(`Making request to: ${config.baseURL}${config.url}`);
   const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
