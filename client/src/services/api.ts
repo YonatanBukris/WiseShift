@@ -13,10 +13,11 @@ if (!API_URL) {
   throw new Error("API URL not configured");
 }
 
-console.log("API URL:", API_URL); // לבדיקה
+// Add debug log
+console.log("API URL:", API_URL);
 
 const api: AxiosInstance = axios.create({
-  baseURL: API_URL,
+  baseURL: API_URL, // This should be https://wiseshift.onrender.com/api
   headers: {
     "Content-Type": "application/json",
   },
@@ -25,7 +26,8 @@ const api: AxiosInstance = axios.create({
 
 // Add request logging with full URL
 api.interceptors.request.use((config) => {
-  console.log(`Making request to: ${config.baseURL}${config.url}`);
+  const fullUrl = `${config.baseURL}${config.url}`;
+  console.log(`Making request to: ${fullUrl}`);
   const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
