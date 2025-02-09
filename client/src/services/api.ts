@@ -53,8 +53,11 @@ interface AuthResponse extends ApiResponse<IUser> {
 export const authAPI = {
   register: async (data: RegisterData): Promise<AxiosResponse<AuthResponse>> =>
     api.post("/auth/register", data),
-  login: async (data: LoginCredentials): Promise<AxiosResponse<AuthResponse>> =>
-    api.post("/auth/login", data),
+  login: async (
+    credentials: LoginCredentials
+  ): Promise<AxiosResponse<AuthResponse>> => {
+    return api.post("/auth/login", credentials);
+  },
 };
 
 export const dashboardAPI = {
