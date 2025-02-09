@@ -20,13 +20,13 @@ app.use(
 );
 app.use(express.json());
 
-// Add a test endpoint under /api (without auth)
-app.get("/api/test", (_, res) => {
+// Mount all routes directly (without /api prefix)
+app.use(routes);
+
+// Add test endpoint
+app.get("/test", (_, res) => {
   res.json({ message: "Server is running" });
 });
-
-// Mount all routes under /api (with auth)
-app.use("/api", routes);
 
 // Add error handling middleware
 app.use((req, res) => {
