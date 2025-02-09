@@ -8,7 +8,7 @@ import {
 } from "../types/models";
 import { AssessmentFormData } from "../components/forms/AssessmentForm";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 if (!API_URL) {
   throw new Error("API URL not configured");
 }
