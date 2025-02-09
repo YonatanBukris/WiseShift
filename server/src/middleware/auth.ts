@@ -11,33 +11,27 @@ export const protect = async (
   req: Request,
   res: Response,
   next: NextFunction
-): Promise<void> => {
+) => {
+  // Skip auth routes
+  if (req.path.startsWith("/auth/") || req.path === "/test") {
+    return next();
+  }
+
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "Not authorized, no token" });
+  }
+
   try {
-    let token: string | undefined;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+    const user = await User.findById(decoded.id).select("-password");
 
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")
-    ) {
-      token = req.headers.authorization.split(" ")[1];
-
-      const decoded = jwt.verify(
-        token,
-        process.env.JWT_SECRET!
-      ) as JwtPayload;
-      
-      const user = await User.findById(decoded.id).select("-password");
-      
-      if (!user) {
-        res.status(401).json({ message: "Not authorized" });
-        return;
-      }
-
-      req.user = user;
-      next();
-    } else {
-      res.status(401).json({ message: "Not authorized, no token" });
+    if (!user) {
+      return res.status(401).json({ message: "Not authorized" });
     }
+
+    req.user = user;
+    next();
   } catch (error) {
     res.status(401).json({ message: "Not authorized, token failed" });
   }
@@ -48,9 +42,9 @@ export const requireRole = (roles: string[]) => {
     if (!req.user || !roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: "Access denied: Insufficient permissions"
+        message: "Access denied: Insufficient permissions",
       });
     }
     next();
   };
-}; 
+};
