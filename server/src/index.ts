@@ -16,6 +16,9 @@ app.use(express.json());
 // Mount all routes under /api
 app.use("/api", routes);
 
+// Also mount routes directly for backward compatibility
+app.use(routes);
+
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGODB_URI!)
