@@ -13,6 +13,8 @@ if (!API_URL) {
   throw new Error("API URL not configured");
 }
 
+console.log("API URL:", API_URL); // לבדיקה
+
 const api: AxiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
@@ -21,7 +23,7 @@ const api: AxiosInstance = axios.create({
   withCredentials: false,
 });
 
-// Add request logging
+// Add request logging with full URL
 api.interceptors.request.use((config) => {
   console.log(`Making request to: ${config.baseURL}${config.url}`);
   const token = localStorage.getItem("token");

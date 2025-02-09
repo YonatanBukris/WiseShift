@@ -23,8 +23,8 @@ app.use(express.json());
 // Mount all routes under /api
 app.use("/api", routes);
 
-// Add a test endpoint
-app.get("/test", (req, res) => {
+// Add a test endpoint under /api
+app.get("/api/test", (req, res) => {
   res.json({ message: "Server is running" });
 });
 
