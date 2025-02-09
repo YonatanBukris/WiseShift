@@ -13,7 +13,9 @@ if (!API_URL) {
   throw new Error("API URL not configured");
 }
 
-// Add debug log
+// Add more debug logs
+console.log("Environment:", import.meta.env.MODE); // יציג אם אנחנו ב-development או production
+console.log("Full env:", import.meta.env); // יציג את כל משתני הסביבה
 console.log("API URL:", API_URL);
 
 const api: AxiosInstance = axios.create({
