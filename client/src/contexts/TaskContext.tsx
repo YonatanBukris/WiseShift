@@ -18,10 +18,12 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
   const { user } = useAuth();
   const [tasks, setTasks] = useState<ITask[]>([]);
   const [emergencyTasks, setEmergencyTasks] = useState<ITask[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const isManager = user?.role === "manager";
 
   const fetchTasks = async () => {
+    if (!user) return;
+
     try {
       setLoading(true);
 
@@ -34,7 +36,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
         if (taskResponse.success) {
           setTasks(taskResponse.data);
         }
-
         if (emergencyResponse.success) {
           setEmergencyTasks(
             emergencyResponse.data.map(
@@ -43,34 +44,22 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
                   ...task,
                   priority: task.criticality,
                   isEmergencyTask: true,
+                  createdBy: task.assignedTo || "",
+                  department: task.location,
+                  dependencies: [],
+                  comments: [],
+                  history: [],
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
                 } as ITask)
             )
           );
         }
       } else {
         const response = await dashboardAPI.getEmployeeDashboard();
-
         if (response.success) {
-          // Filter and process regular tasks
-          const regularTasks = response.data.tasks.filter(
-            (task) => task.assignedTo?.toString() === user?._id
-          );
-
-          // Filter and process emergency tasks
-          const emergencyTasks = response.data.emergencyTasks
-            .filter((task) => task.assignedTo?.toString() === user?._id)
-            .map((task) => ({
-              ...task,
-              priority: task.criticality as
-                | "critical"
-                | "high"
-                | "medium"
-                | "low",
-              isEmergencyTask: true,
-            }));
-
-          setTasks(regularTasks);
-          setEmergencyTasks(emergencyTasks);
+          setTasks(response.data.tasks);
+          setEmergencyTasks(response.data.emergencyTasks);
         }
       }
     } catch (error) {
@@ -81,8 +70,10 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   useEffect(() => {
-    fetchTasks();
-  }, [isManager]);
+    if (user) {
+      fetchTasks();
+    }
+  }, [user, isManager]);
 
   return (
     <TaskContext.Provider
