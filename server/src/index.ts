@@ -21,23 +21,31 @@ app.use(
 );
 app.use(express.json());
 
-// Mount all routes directly (without /api prefix)
-app.use(routes);
-
-// Serve static files from the React app
+// Serve static files from the React app FIRST
 app.use(express.static(path.join(__dirname, "../../client/build")));
 
-// Add test endpoint
+// Handle React routing BEFORE API routes
+app.get("*", (req, res, next) => {
+  // Skip API routes
+  if (
+    req.url.startsWith("/auth") ||
+    req.url.startsWith("/tasks") ||
+    req.url.startsWith("/emergency")
+  ) {
+    return next();
+  }
+  res.sendFile(path.join(__dirname, "../../client/build/index.html"));
+});
+
+// Then mount API routes
+app.use(routes);
+
+// Test endpoint
 app.get("/test", (_, res) => {
   res.json({ message: "Server is running" });
 });
 
-// Handle React routing, return all requests to React app
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../../client/build/index.html"));
-});
-
-// Add error handling middleware
+// Error handling last
 app.use((req, res) => {
   console.log(`404 - Not Found: ${req.method} ${req.url}`);
   res.status(404).json({
