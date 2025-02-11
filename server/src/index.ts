@@ -3,6 +3,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import routes from "./routes/index.js";
+import path from "path";
 
 dotenv.config();
 
@@ -23,9 +24,17 @@ app.use(express.json());
 // Mount all routes directly (without /api prefix)
 app.use(routes);
 
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, "../../client/build")));
+
 // Add test endpoint
 app.get("/test", (_, res) => {
   res.json({ message: "Server is running" });
+});
+
+// Handle React routing, return all requests to React app
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../../client/build/index.html"));
 });
 
 // Add error handling middleware
