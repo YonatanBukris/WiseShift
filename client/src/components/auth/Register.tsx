@@ -23,11 +23,12 @@ interface RegisterFormData {
 }
 
 const departments = [
-  "מחלקת תפעול",
-  "מחלקת משאבי אנוש",
-  "מחלקת כספים",
-  "מחלקת שיווק",
-  "מחלקת מכירות",
+  { value: "admin", label: "מנהל" },
+  { value: "family", label: "משפחה" },
+  { value: "special needs", label: "צרכים מיוחדים" },
+  { value: "senior citizens", label: "אזרחים ותיקים" },
+  { value: "sturdiness", label: "חוסן" },
+  { value: "community", label: "קהילה" },
 ];
 
 const Register = () => {
@@ -133,8 +134,8 @@ const Register = () => {
             }
           >
             {departments.map((dept) => (
-              <MenuItem key={dept} value={dept}>
-                {dept}
+              <MenuItem key={dept.value} value={dept.value}>
+                {dept.label}
               </MenuItem>
             ))}
           </TextField>

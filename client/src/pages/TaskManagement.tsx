@@ -4,9 +4,10 @@ import { Add as AddIcon } from "@mui/icons-material";
 import { TaskForm } from "../components/tasks/TaskForm";
 import { TaskList } from "../components/tasks/TaskList";
 import { taskAPI, CreateTaskData } from "../services/api";
-import { ITask } from "../types/models";
+import { ITask, IEmergencyTask, TaskStatus } from "../types/models";
 import { useAuth } from "../contexts/AuthContext";
 import { useTask } from "../contexts/TaskContext";
+import { emergencyAPI } from "../services/api";
 
 export const TaskManagement = () => {
   const { user } = useAuth();
@@ -19,8 +20,6 @@ export const TaskManagement = () => {
 
   // Combine both task types
   const allTasks = [...tasks, ...emergencyTasks];
-
-  // Also log the assignedTo values to check the comparison
 
   const handleCreateTask = async (taskData: CreateTaskData) => {
     try {
@@ -36,9 +35,19 @@ export const TaskManagement = () => {
     }
   };
 
-  const handleEditTask = async (task: ITask) => {
-    // TODO: Implement edit functionality
-    console.log("Edit task:", task);
+  const handleTaskUpdate = async (task: ITask | IEmergencyTask) => {
+    try {
+      if ("requiredSkills" in task) {
+        // Type guard for IEmergencyTask
+        await emergencyAPI.updateTask(task._id, task);
+      } else {
+        // handle regular task
+        await taskAPI.updateTask(task._id, task);
+      }
+      await fetchTasks();
+    } catch (error) {
+      setError("שגיאה בעדכון המשימה");
+    }
   };
 
   const handleDeleteTask = async (taskId: string) => {
@@ -54,19 +63,63 @@ export const TaskManagement = () => {
     }
   };
 
-  const handleStatusChange = async (
+  const handleStatusChange = async (taskId: string, newStatus: TaskStatus) => {
+    try {
+      const task = allTasks.find((t) => t._id === taskId);
+      if (!task) return;
+
+      if ("isEmergencyTask" in task) {
+        await emergencyAPI.updateTask(taskId, { status: newStatus });
+      } else {
+        await taskAPI.updateTask(taskId, { status: newStatus });
+      }
+
+      setSuccessMessage("סטטוס המשימה עודכן בהצלחה");
+      await fetchTasks();
+    } catch (error) {
+      setError("שגיאה בעדכון סטטוס המשימה");
+      console.error(error);
+    }
+  };
+
+  const handleAddNote = async (
     taskId: string,
-    newStatus: ITask["status"]
+    note: { text?: string; file?: File }
   ) => {
     try {
-      const response = await taskAPI.updateTask(taskId, { status: newStatus });
-      if (response.success) {
-        setSuccessMessage("Task status updated successfully");
-        fetchTasks();
+      const task = allTasks.find((t) => t._id === taskId);
+      if (!task) return;
+
+      if ("isEmergencyTask" in task) {
+        await emergencyAPI.addNote(taskId, note);
+      } else {
+        await taskAPI.addNote(taskId, note);
       }
-    } catch (err) {
-      setError("Failed to update task status");
-      console.error(err);
+
+      setSuccessMessage("הערה נוספה בהצלחה");
+      await fetchTasks();
+    } catch (error) {
+      setError("שגיאה בהוספת הערה");
+      console.error(error);
+    }
+  };
+
+  const handleDeleteNote = async (taskId: string, noteId: string) => {
+    try {
+      const task = allTasks.find((t) => t._id === taskId);
+      if (!task) return;
+
+      if ("isEmergencyTask" in task) {
+        await emergencyAPI.deleteNote(taskId, noteId);
+      } else {
+        await taskAPI.deleteNote(taskId, noteId);
+      }
+
+      setSuccessMessage("הערה נמחקה בהצלחה");
+      await fetchTasks();
+    } catch (error) {
+      setError("שגיאה במחיקת ההערה");
+      console.error(error);
     }
   };
 
@@ -86,7 +139,8 @@ export const TaskManagement = () => {
         >
           <Box>
             <Typography variant="h4" color="primary.dark">
-              {tasks.length + emergencyTasks.length}
+              {tasks.filter((t) => t.status !== "completed").length +
+                emergencyTasks.filter((t) => t.status !== "completed").length}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               משימות פעילות
@@ -106,7 +160,8 @@ export const TaskManagement = () => {
         >
           <Box>
             <Typography variant="h4" color="primary.dark">
-              {tasks.filter((t) => t.status === "completed").length}
+              {tasks.filter((t) => t.status === "completed").length +
+                emergencyTasks.filter((t) => t.status === "completed").length}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               משימות שהושלמו
@@ -176,10 +231,12 @@ export const TaskManagement = () => {
 
         <TaskList
           tasks={allTasks}
-          onEdit={handleEditTask}
+          onEdit={handleTaskUpdate}
           onDelete={handleDeleteTask}
           onStatusChange={handleStatusChange}
+          onAddNote={handleAddNote}
           fetchTasks={fetchTasks}
+          onDeleteNote={handleDeleteNote}
         />
       </Paper>
 

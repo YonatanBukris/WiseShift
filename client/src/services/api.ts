@@ -5,10 +5,14 @@ import {
   ManagerDashboardData,
   EmployeeDashboardData,
   ITask,
+  INote,
 } from "../types/models";
 import { AssessmentFormData } from "../components/forms/AssessmentForm";
 
-const API_URL = `${import.meta.env.VITE_API_URL}/api`;
+const API_URL = import.meta.env.PROD
+  ? `${import.meta.env.VITE_API_URL}/api` // רק ב-production נוסיף /api
+  : import.meta.env.VITE_API_URL; // ב-development נשאיר כמו שזה
+
 if (!API_URL) {
   throw new Error("API URL not configured");
 }
@@ -79,10 +83,16 @@ export const dashboardAPI = {
 };
 
 export const assessmentAPI = {
-  submitForm: async (
-    formData: AssessmentFormData
-  ): Promise<ApiResponse<void>> => {
+  submitForm: async (formData: AssessmentFormData) => {
     const response = await api.post("/assessment/submit", formData);
+    return response.data;
+  },
+  triggerAssessmentForms: async () => {
+    const response = await api.post("/assessment/trigger");
+    return response.data;
+  },
+  checkPendingForm: async () => {
+    const response = await api.get("/assessment/check-pending");
     return response.data;
   },
 };
@@ -102,6 +112,18 @@ interface TaskFilters {
   status?: string;
   assignedTo?: string;
 }
+
+// Add at the top with other constants
+const BASE_URL = import.meta.env.VITE_API_URL;
+
+// Helper function to get full file URL
+export const getFileUrl = (path: string, originalName: string) => {
+  if (!path) return "";
+  const filename = path.replace(/^uploads[/\\]/, "");
+  return `${BASE_URL}/files/${filename}?name=${encodeURIComponent(
+    originalName
+  )}`;
+};
 
 export const taskAPI = {
   createTask: async (taskData: CreateTaskData): Promise<ApiResponse<ITask>> => {
@@ -132,10 +154,27 @@ export const taskAPI = {
     return response.data;
   },
 
-  getAvailableEmployees: async () => {
+  getAllEmployees: async () => {
     const response = await api.get("/tasks/available-employees");
     return response.data;
   },
+
+  addNote: async (taskId: string, note: { text?: string; file?: File }) => {
+    const formData = createFormData(note);
+    const response = await api.post<ApiResponse<ITask>>(
+      `/tasks/${taskId}/notes`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  },
+
+  deleteNote: (taskId: string, noteId: string) =>
+    api.delete<ApiResponse<ITask>>(`/tasks/${taskId}/notes/${noteId}`),
 };
 
 export const emergencyAPI = {
@@ -163,7 +202,7 @@ export const emergencyAPI = {
     return response.data;
   },
 
-  getAvailableEmployees: async () => {
+  getAllEmployees: async () => {
     const response = await api.get("/emergency/available-employees");
     return response.data;
   },
@@ -182,6 +221,28 @@ export const emergencyAPI = {
     const response = await api.post("/emergency/deactivate");
     return response.data;
   },
+
+  updateTask: (taskId: string, updates: Partial<EmergencyTask>) =>
+    api.put<EmergencyTask>(`/emergency/${taskId}`, updates),
+
+  addNote: async (taskId: string, note: { text?: string; file?: File }) => {
+    const formData = createFormData(note);
+    const response = await api.post<ApiResponse<EmergencyTask>>(
+      `/emergency/${taskId}/notes`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  },
+
+  deleteNote: (taskId: string, noteId: string) =>
+    api.delete<ApiResponse<EmergencyTask>>(
+      `/emergency/${taskId}/notes/${noteId}`
+    ),
 };
 
 interface EmergencyTask {
@@ -189,9 +250,24 @@ interface EmergencyTask {
   title: string;
   description: string;
   criticality: "critical" | "high" | "medium" | "low";
-  status: "pending" | "assigned" | "inProgress" | "completed";
+  status:
+    | "pending"
+    | "assigned"
+    | "inProgress"
+    | "completed"
+    | "transferred"
+    | "cancelled";
   assignedTo?: string;
   location: string;
+  isEmergencyTask: boolean;
+  notes: INote[];
 }
+
+const createFormData = (note: { text?: string; file?: File }) => {
+  const formData = new FormData();
+  if (note.text) formData.append("text", note.text);
+  if (note.file) formData.append("file", note.file);
+  return formData;
+};
 
 export default api;

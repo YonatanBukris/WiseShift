@@ -1,25 +1,41 @@
 import mongoose, { Schema } from "mongoose";
 import { IAssessmentForm } from "../types/models.js";
 
-const AssessmentFormSchema = new Schema<IAssessmentForm>({
-  employee: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  submittedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  stressLevel: { type: Number, required: true, min: 1, max: 10 },
-  physicallyInjured: { type: Boolean, required: true },
-  injuryDetails: { type: String },
-  spouseAvailable: { type: Boolean, required: true },
-  availableHours: { type: Number, required: true, min: 0, max: 24 },
-  canWorkAsUsual: { type: Boolean, required: true },
-  constraints: { type: String },
-  status: {
-    type: String,
-    enum: ["draft", "submitted", "reviewed"],
-    default: "submitted",
+const AssessmentFormSchema = new Schema<IAssessmentForm>(
+  {
+    employee: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    submittedBy: { type: Schema.Types.ObjectId, ref: "User", required: false },
+    stressLevel: { type: Number, required: false },
+    physicallyInjured: { type: Boolean, required: false },
+    injuryDetails: { type: String },
+    spouseAvailable: { type: Boolean, required: false },
+    availableHours: { type: Number, required: false },
+    canWorkAsUsual: { type: Boolean, required: false },
+    constraints: { type: String },
+    status: {
+      type: String,
+      enum: ["pending", "submitted", "reviewed"],
+      default: "pending",
+    },
+    reviewedBy: { type: Schema.Types.ObjectId, ref: "User" },
+    reviewNotes: { type: String },
+    triggered: {
+      type: Boolean,
+      default: false,
+    },
+    triggeredAt: {
+      type: Date,
+    },
+    submittedAt: {
+      type: Date,
+    },
   },
-  reviewedBy: { type: Schema.Types.ObjectId, ref: "User" },
-  reviewNotes: { type: String },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-});
+  {
+    timestamps: true,
+  }
+);
 
-export default mongoose.model<IAssessmentForm>("AssessmentForm", AssessmentFormSchema); 
+export default mongoose.model<IAssessmentForm>(
+  "AssessmentForm",
+  AssessmentFormSchema
+);

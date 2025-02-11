@@ -62,6 +62,7 @@ export interface ManagerDashboardData {
     pendingReview: number;
     total: number;
   };
+  emergencyStatus: "Active" | "Inactive";
 }
 
 export interface EmployeeDashboardData {
@@ -83,17 +84,31 @@ export interface EmployeeDashboardData {
   }>;
 }
 
+export interface INote {
+  _id: string;
+  text?: string;
+  file?: {
+    filename: string;
+    path: string;
+    mimetype: string;
+  };
+  createdBy: string;
+  createdAt: Date;
+}
+
+export type TaskStatus =
+  | "pending"
+  | "assigned"
+  | "inProgress"
+  | "completed"
+  | "transferred"
+  | "cancelled";
+
 export interface ITask {
   _id: string;
   title: string;
   description?: string;
-  status:
-    | "pending"
-    | "inProgress"
-    | "completed"
-    | "transferred"
-    | "cancelled"
-    | "assigned";
+  status: TaskStatus;
   priority: "low" | "medium" | "high" | "critical";
   assignedTo?:
     | {
@@ -122,6 +137,7 @@ export interface ITask {
     updatedBy: string;
     updatedAt: Date;
   }>;
+  notes: INote[];
   createdAt: Date;
   updatedAt: Date;
   isEmergencyTask?: boolean;
@@ -134,8 +150,25 @@ export interface EmergencyTask {
   title: string;
   description: string;
   criticality: "low" | "medium" | "high" | "critical";
+  department: string;
   status: "pending" | "inProgress" | "completed" | "assigned";
   assignedTo?: string;
   location: string;
+  isEmergencyTask: boolean;
+}
+
+export interface IEmergencyTask {
+  _id: string;
+  title: string;
+  description: string;
+  criticality: "low" | "medium" | "high" | "critical";
+  department: string;
+  status: TaskStatus;
+  assignedTo?: string;
+  requiredSkills: string[];
+  estimatedTime: number;
+  location: string;
+  notes?: INote[];
+  isActive: boolean;
   isEmergencyTask: boolean;
 }

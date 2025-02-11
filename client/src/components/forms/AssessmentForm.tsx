@@ -16,11 +16,11 @@ import {
   Grid,
 } from "@mui/material";
 
-interface AssessmentFormProps {
+interface Props {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: AssessmentFormData) => void;
-  initialData?: AssessmentFormData;
+  title?: string;
 }
 
 export interface AssessmentFormData {
@@ -42,7 +42,8 @@ export const AssessmentForm = ({
   open,
   onClose,
   onSubmit,
-}: AssessmentFormProps) => {
+  title = "עדכון סטטוס",
+}: Props) => {
   const [formData, setFormData] = useState<AssessmentFormData>({
     stressLevel: 0,
     physicallyInjured: false,
@@ -76,7 +77,7 @@ export const AssessmentForm = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>טופס הערכת מצב יומי</DialogTitle>
+      <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <Box sx={{ mt: 2 }}>
           <Grid container direction="column" spacing={3}>

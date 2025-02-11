@@ -1,10 +1,10 @@
-import { Document, Types } from 'mongoose';
+import { Document, Types, Schema } from "mongoose";
 
 export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  role: 'manager' | 'employee' | 'guest';
+  role: "manager" | "employee" | "guest";
   department: string;
   phoneNumber?: string;
   emergencyContact?: {
@@ -33,34 +33,34 @@ export interface IUser extends Document {
 export interface ITask extends Document {
   title: string;
   description?: string;
-  status: 'pending' | 'inProgress' | 'completed' | 'transferred' | 'cancelled';
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  assignedTo?: IUser['_id'];
-  createdBy: IUser['_id'];
+  status: "pending" | "inProgress" | "completed" | "transferred" | "cancelled";
+  priority: "low" | "medium" | "high" | "critical";
+  assignedTo?: IUser["_id"];
+  createdBy: IUser["_id"];
   department: string;
   deadline?: Date;
   estimatedHours?: number;
   actualHours?: number;
   dependencies: Array<{
-    task: ITask['_id'];
-    type: 'blocks' | 'blocked_by';
+    task: ITask["_id"];
+    type: "blocks" | "blocked_by";
   }>;
   comments: Array<{
     text: string;
-    author: IUser['_id'];
+    author: IUser["_id"];
     createdAt: Date;
   }>;
   history: Array<{
     field: string;
     oldValue: any;
     newValue: any;
-    updatedBy: IUser['_id'];
+    updatedBy: IUser["_id"];
     updatedAt: Date;
   }>;
   createdAt: Date;
   updatedAt: Date;
+  notes: Note[];
 }
-
 
 export interface IAssessmentForm extends Document {
   employee: Types.ObjectId;
@@ -72,7 +72,10 @@ export interface IAssessmentForm extends Document {
   availableHours: number;
   canWorkAsUsual: boolean;
   constraints?: string;
-  status: "draft" | "submitted" | "reviewed";
+  triggered: boolean;
+  triggeredAt?: Date;
+  submittedAt?: Date;
+  status: "pending" | "submitted" | "reviewed";
   reviewedBy?: Types.ObjectId;
   reviewNotes?: string;
   createdAt: Date;
@@ -90,6 +93,7 @@ export interface TaskStats {
   active: number;
   completed: number;
   pending: number;
+  total: number;
   department: string;
 }
 
@@ -107,9 +111,10 @@ export interface ManagerDashboardData {
       canWorkAsUsual: boolean;
     }>;
   };
+  emergencyStatus: "Active" | "Inactive";
   recentUpdates?: Array<{
     timestamp: Date;
-    type: 'status' | 'task';
+    type: "status" | "task";
     message: string;
   }>;
 }
@@ -126,7 +131,7 @@ export interface EmployeeDashboardData {
   };
   recentActivity?: Array<{
     timestamp: Date;
-    type: 'status' | 'task';
+    type: "status" | "task";
     message: string;
   }>;
   tasks: ITask[];
@@ -137,11 +142,24 @@ export interface EmergencyTask extends Document {
   _id: Types.ObjectId;
   title: string;
   description?: string;
-  criticality: 'critical' | 'high' | 'medium' | 'low';
-  status: 'pending' | 'assigned' | 'inProgress' | 'completed';
+  criticality: "critical" | "high" | "medium" | "low";
+  status: "pending" | "assigned" | "inProgress" | "completed";
   assignedTo?: Types.ObjectId;
   location?: string;
   isActive: boolean;
   requiredSkills?: string[];
   estimatedTime?: number;
-} 
+  notes: Note[];
+}
+
+export interface Note {
+  _id?: string;
+  text?: string;
+  file?: {
+    filename?: string;
+    path?: string;
+    mimetype?: string;
+  };
+  createdBy: string | Types.ObjectId;
+  createdAt: Date;
+}

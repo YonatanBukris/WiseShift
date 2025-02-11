@@ -1,21 +1,14 @@
 import { useEffect, useState } from "react";
-import {
-  Box,
-  Typography,
-  Button,
-  Grid,
-  Paper,
-  Card,
-  CardContent,
-} from "@mui/material";
+import { Box, Typography, Button, Card, CardContent } from "@mui/material";
 import { format } from "date-fns";
 import { he } from "date-fns/locale";
-import { dashboardAPI, emergencyAPI } from "../../services/api";
+import { dashboardAPI, emergencyAPI, assessmentAPI } from "../../services/api";
 import { ManagerDashboardData } from "../../types/models";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import WarningIcon from "@mui/icons-material/Warning";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import { StatisticsCircle } from "./StatisticsCircle";
+import SendIcon from "@mui/icons-material/Send";
+import { OverviewCharts } from "./OverviewCharts";
 
 export const ManagerDashboard = () => {
   const [dashboardData, setDashboardData] =
@@ -46,7 +39,7 @@ export const ManagerDashboard = () => {
     try {
       if (window.confirm("האם אתה בטוח שברצונך להפעיל מצב חירום?")) {
         await emergencyAPI.activateEmergency("Emergency Activated", []);
-        await fetchDashboard();
+        window.location.reload();
       }
     } catch (err) {
       setError("Failed to activate emergency mode");
@@ -57,11 +50,28 @@ export const ManagerDashboard = () => {
   const handleEmergencyReset = async () => {
     try {
       if (window.confirm("האם אתה בטוח שברצונך לסיים את מצב החירום?")) {
-        await emergencyAPI.deactivateEmergency();
-        await fetchDashboard();
+        const response = await emergencyAPI.deactivateEmergency();
+        if (response.success) {
+          window.location.reload();
+        }
       }
     } catch (err) {
       setError("Failed to reset emergency state");
+      console.error(err);
+    }
+  };
+
+  const handleSendAssessmentForms = async () => {
+    try {
+      if (window.confirm("האם אתה בטוח שברצונך לשלוח טפסים לכל העובדים?")) {
+        const response = await assessmentAPI.triggerAssessmentForms();
+        if (response.success) {
+          alert("הטפסים נשלחו בהצלחה");
+          window.location.reload();
+        }
+      }
+    } catch (err) {
+      setError("שגיאה בשליחת הטפסים");
       console.error(err);
     }
   };
@@ -83,7 +93,6 @@ export const ManagerDashboard = () => {
         >
           הפעל מצב חירום
         </Button>
-
         <Button
           variant="contained"
           color="secondary"
@@ -91,6 +100,14 @@ export const ManagerDashboard = () => {
           startIcon={<RestartAltIcon />}
         >
           סיום מצב חירום
+        </Button>
+        <Button
+          variant="contained"
+          color="info"
+          onClick={handleSendAssessmentForms}
+          startIcon={<SendIcon />}
+        >
+          שלח טופס
         </Button>
       </Box>
 
@@ -107,49 +124,11 @@ export const ManagerDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Dashboard Stats */}
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={3}>
-          <Paper sx={{ p: 2 }}>
-            <StatisticsCircle
-              value={dashboardData?.employeeStats.totalEmployees || 0}
-              total={dashboardData?.employeeStats.totalEmployees || 0}
-              label="סה״כ עובדים"
-              color="primary.main"
-            />
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Paper sx={{ p: 2 }}>
-            <StatisticsCircle
-              value={dashboardData?.employeeStats.availableEmployees || 0}
-              total={dashboardData?.employeeStats.totalEmployees || 0}
-              label="עובדים זמינים"
-              color="success.main"
-            />
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Paper sx={{ p: 2 }}>
-            <StatisticsCircle
-              value={dashboardData?.taskStats.active || 0}
-              total={dashboardData?.taskStats.total || 0}
-              label="משימות בביצוע"
-              color="info.main"
-            />
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Paper sx={{ p: 2 }}>
-            <StatisticsCircle
-              value={dashboardData?.formStats.submittedToday || 0}
-              total={dashboardData?.formStats.total || 0}
-              label="טפסים מלאים"
-              color="warning.main"
-            />
-          </Paper>
-        </Grid>
-      </Grid>
+      {/* Overview Section */}
+      <Typography variant="h5" sx={{ mb: 2 }}>
+        סקירה כללית
+      </Typography>
+      {dashboardData && <OverviewCharts data={dashboardData} />}
     </Box>
   );
 };

@@ -17,6 +17,8 @@ import { MainLayout } from "./components/layout/MainLayout";
 import { ThemeProvider } from "@mui/material/styles";
 import { theme } from "./theme/theme";
 import { TaskProvider } from "./contexts/TaskContext";
+import { Profile } from "./pages/Profile";
+import { Employees } from "./pages/Employees";
 
 function App() {
   return (
@@ -45,6 +47,26 @@ function App() {
                     <ProtectedRoute>
                       <MainLayout>
                         <TaskManagement />
+                      </MainLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <MainLayout>
+                        <Profile />
+                      </MainLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/employees"
+                  element={
+                    <ProtectedRoute>
+                      <MainLayout>
+                        <Employees />
                       </MainLayout>
                     </ProtectedRoute>
                   }

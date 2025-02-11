@@ -5,58 +5,119 @@ import EmergencyTask from "../models/EmergencyTask.js";
 config();
 
 const emergencyTasks = [
+  // Family Department Tasks
   {
-    title: "סיוע לקשישים ואנשים עם מוגבלות",
-    description: "פינוי, אספקת תרופות ותמיכה רגשית לקשישים ואנשים עם מוגבלות",
+    title: "מיפוי צרכים טלפוני",
+    description:
+      "יצירת קשר טלפוני עם משפחות לזיהוי צרכים מיידיים וארוכי טווח במצב החירום",
     criticality: "high",
-    location: "שדרות",
-    requiredSkills: ["טיפול בקשישים", "עזרה ראשונה"],
+    department: "family",
+    requiredSkills: ["תקשורת בינאישית", "הערכת מצב"],
     estimatedTime: 120,
     isActive: false,
   },
   {
-    title: "הגנה וטיפול בילדים ונוער בסיכון",
-    description: "איתור וסיוע לילדים ונוער במצבי סיכון בזמן החירום",
+    title: "ביקורי בית למשפחות",
+    description:
+      "ביקור פיזי במשפחות שזוהו כזקוקות לתמיכה מיוחדת והערכת מצבן בשטח",
     criticality: "critical",
-    location: "שדרות",
-    requiredSkills: ["עבודה עם נוער", "טיפול במצבי חירום"],
+    department: "family",
+    requiredSkills: ["עבודה סוציאלית", "הערכת מצב"],
     estimatedTime: 180,
     isActive: false,
   },
+
+  // Special Needs Department Tasks
   {
-    title: "סיוע למשפחות מעוטות יכולת ולדרי רחוב",
-    description: "איתור וסיוע למשפחות נזקקות ודרי רחוב, כולל אספקת צרכים בסיסיים",
+    title: "איתור צרכים בשיחת טלפון יזומה",
+    description:
+      "יצירת קשר יזום עם אנשים בעלי צרכים מיוחדים לבדיקת מצבם וצורכיהם",
     criticality: "high",
-    location: "שדרות",
-    requiredSkills: ["עבודה סוציאלית", "סיוע הומניטרי"],
-    estimatedTime: 150,
+    department: "special needs",
+    requiredSkills: ["תקשורת מותאמת", "הכרת צרכים מיוחדים"],
+    estimatedTime: 90,
     isActive: false,
   },
   {
-    title: "הקמת מקלטים ומרכזי קליטה זמניים",
-    description: "ארגון והקמת מרכזי קליטה זמניים לעקורים מבתיהם",
+    title: "הפעלת מוקד לאוכלוסייה מיוחדת",
+    description:
+      "הפעלת מוקד ייעודי למתן מענה מותאם לאוכלוסייה עם צרכים מיוחדים",
     criticality: "critical",
-    location: "שדרות",
-    requiredSkills: ["לוגיסטיקה", "ניהול מתקנים"],
+    department: "special needs",
+    requiredSkills: ["ניהול מוקד", "הכרת צרכים מיוחדים"],
+    estimatedTime: 480,
+    isActive: false,
+  },
+  {
+    title: "וידוא חדרים נגישים באזורי פינוי",
+    description:
+      "הבטחת זמינות מקומות מתאימים ונגישים עבור אנשים עם מוגבלויות באזורי פינוי",
+    criticality: "high",
+    department: "special needs",
+    requiredSkills: ["נגישות", "לוגיסטיקה"],
     estimatedTime: 240,
     isActive: false,
   },
+
+  // Senior Citizens Department Tasks
   {
-    title: "אספקת מזון, מים ותרופות",
-    description: "חלוקת מזון, מים, שמיכות, בגדים ותרופות לנזקקים",
+    title: "יצירת קשר עם אזרחים ותיקים",
+    description: "בדיקה טלפונית של מצב ואיתור צרכים של אזרחים ותיקים",
     criticality: "high",
-    location: "שדרות",
-    requiredSkills: ["לוגיסטיקה", "ניהול מלאי"],
-    estimatedTime: 180,
+    department: "senior citizens",
+    requiredSkills: ["תקשורת עם קשישים", "הערכת מצב"],
+    estimatedTime: 120,
     isActive: false,
   },
   {
-    title: "תמיכה רגשית ופסיכו-סוציאלית",
-    description: "מתן תמיכה רגשית ופסיכולוגית לנפגעים וסובלים מחרדה",
+    title: "ביקורי בית לקשישים",
+    description:
+      "ביקור פיזי אצל אזרחים ותיקים לבדיקת מצבם ומתן סיוע במידת הצורך",
+    criticality: "critical",
+    department: "senior citizens",
+    requiredSkills: ["טיפול בקשישים", "עזרה ראשונה"],
+    estimatedTime: 180,
+    isActive: false,
+  },
+
+  // Sturdiness Department Tasks
+  {
+    title: "ריכוז פניות למרכז חוסן",
+    description: "ניהול ותיאום הפניות למרכז החוסן וחיבור לגורמי טיפול מתאימים",
+    criticality: "high",
+    department: "sturdiness",
+    requiredSkills: ["ניהול פניות", "תיאום טיפול"],
+    estimatedTime: 480,
+    isActive: false,
+  },
+
+  // Community Department Tasks
+  {
+    title: "הפעלת מועדוניות",
+    description: "ארגון והפעלת מסגרות פעילות קהילתיות בהתאם למצב ולהנחיות",
     criticality: "medium",
-    location: "שדרות",
-    requiredSkills: ["פסיכולוגיה", "עבודה סוציאלית"],
-    estimatedTime: 120,
+    department: "community",
+    requiredSkills: ["הפעלת קבוצות", "ניהול פעילות"],
+    estimatedTime: 300,
+    isActive: false,
+  },
+  {
+    title: "תפעול צח״י עירוני",
+    description:
+      "ניהול וריכוז פעילות צוות החירום היישובי ועדכון תמונת המצב השוטפת",
+    criticality: "critical",
+    department: "community",
+    requiredSkills: ["ניהול חירום", "תיאום צוותים"],
+    estimatedTime: 480,
+    isActive: false,
+  },
+  {
+    title: "הפעלת תכנית מרגישים בבית",
+    description: "ארגון פעילויות קהילתיות תומכות ליצירת תחושת שייכות וביטחון",
+    criticality: "medium",
+    department: "community",
+    requiredSkills: ["הנחיית קבוצות", "פיתוח קהילתי"],
+    estimatedTime: 240,
     isActive: false,
   },
 ];
@@ -66,11 +127,9 @@ const seedEmergencyTasks = async () => {
     await mongoose.connect(process.env.MONGODB_URI!);
     console.log("Connected to MongoDB");
 
-    // Clear existing emergency tasks
     await EmergencyTask.deleteMany({});
     console.log("Cleared existing emergency tasks");
 
-    // Insert new emergency tasks
     await EmergencyTask.insertMany(emergencyTasks);
     console.log("Successfully seeded emergency tasks");
 
@@ -81,4 +140,4 @@ const seedEmergencyTasks = async () => {
   }
 };
 
-seedEmergencyTasks(); 
+seedEmergencyTasks();

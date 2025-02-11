@@ -10,58 +10,54 @@ import { IUser } from "../types/models.js";
 import { Types } from "mongoose";
 import Task from "../models/Task.js";
 import EmergencyTask from "../models/EmergencyTask.js";
+import Emergency from "../models/Emergency.js";
 
-export const managerDashboard = async (
-  req: Request,
-  res: Response<ApiResponse<ManagerDashboardData>>
-) => {
+export const managerDashboard = async (req: Request, res: Response) => {
   try {
-    // Get all employees (excluding managers)
-    const employees = await User.find({ role: "employee" });
-    const availableEmployees = employees.filter(
-      (emp) => emp.status.canWorkAsUsual
-    );
+    const totalEmployees = await User.countDocuments({ role: "employee" });
+    const availableEmployees = await User.countDocuments({
+      role: "employee",
+      "status.canWorkAsUsual": true,
+    });
 
-    // Get today's form submissions
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
+    // Get tasks stats
+    const activeTasks = await Task.countDocuments({ status: "active" });
+    const completedTasks = await Task.countDocuments({ status: "completed" });
+    const pendingTasks = await Task.countDocuments({ assignedTo: null }); // unassigned tasks
 
-    const todaysForms = await AssessmentForm.find({
-      createdAt: { $gte: startOfDay },
-    }).populate<{ employee: { _id: Types.ObjectId; name: string } }>(
-      "employee",
-      "name"
-    );
+    const latestForms = await AssessmentForm.aggregate([
+      { $match: { status: "submitted" } },
+      { $sort: { submittedAt: -1 } },
+      {
+        $group: {
+          _id: "$employee",
+          latestForm: { $first: "$$ROOT" },
+        },
+      },
+    ]);
 
-    // Find critical cases (high stress or injured)
-    const criticalCases = todaysForms
-      .filter((form) => form.stressLevel >= 8 || form.physicallyInjured)
-      .map((form) => ({
-        employeeId: form.employee._id.toString(), // Convert ObjectId to string
-        name: form.employee.name,
-        stressLevel: form.stressLevel,
-        physicallyInjured: form.physicallyInjured,
-        canWorkAsUsual: form.canWorkAsUsual,
-      }));
+    const emergencyStatus = await Emergency.findOne({}).sort({ createdAt: -1 });
 
     const dashboardData: ManagerDashboardData = {
       employeeStats: {
-        totalEmployees: employees.length,
-        availableEmployees: availableEmployees.length,
-        unavailableEmployees: employees.length - availableEmployees.length,
+        totalEmployees,
+        availableEmployees,
+        unavailableEmployees: totalEmployees - availableEmployees,
         department: "כל המחלקות",
       },
       taskStats: {
-        active: 0,
-        completed: 0,
-        pending: 0,
+        active: activeTasks,
+        completed: completedTasks,
+        pending: pendingTasks,
+        total: activeTasks + completedTasks + pendingTasks,
         department: "כל המחלקות",
       },
       formStats: {
-        submittedToday: todaysForms.length,
-        totalEmployees: employees.length,
-        criticalCases,
+        submittedToday: latestForms.length,
+        totalEmployees,
+        criticalCases: [],
       },
+      emergencyStatus: emergencyStatus?.status || "Inactive",
     };
 
     res.json({
@@ -71,7 +67,7 @@ export const managerDashboard = async (
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Error fetching manager dashboard",
+      message: "Error fetching dashboard data",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }

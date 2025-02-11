@@ -5,9 +5,11 @@ export const TaskTableHeader = ({ isManager }: { isManager: boolean }) => {
     <TableHead>
       <TableRow>
         <TableCell align="right">כותרת</TableCell>
-        <TableCell align="right">עדיפות</TableCell>
+        <TableCell align="right">תא</TableCell>
+        <TableCell align="right">דחיפות</TableCell>
         <TableCell align="right">סטטוס</TableCell>
         {isManager && <TableCell align="right">משויך ל</TableCell>}
+        <TableCell align="right">הערות</TableCell>
         {isManager && <TableCell align="right">פעולות</TableCell>}
       </TableRow>
     </TableHead>

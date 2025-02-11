@@ -110,10 +110,10 @@ export const TaskForm = ({
                   }))
                 }
               >
-                <MenuItem value="low">נמוכה</MenuItem>
-                <MenuItem value="medium">בינונית</MenuItem>
+                <MenuItem value="critical">דחוף</MenuItem>
                 <MenuItem value="high">גבוהה</MenuItem>
-                <MenuItem value="critical">קריטית</MenuItem>
+                <MenuItem value="medium">בינונית</MenuItem>
+                <MenuItem value="low">נמוכה</MenuItem>
               </Select>
             </FormControl>
           </Grid>

@@ -1,9 +1,15 @@
-import { Router } from "express";
-import { submitAssessmentForm } from "../controllers/assessmentController.js";
+import express from "express";
+import {
+  submitAssessmentForm,
+  triggerAssessmentForms,
+  checkPendingForm,
+} from "../controllers/assessmentController.js";
 import { protect, requireRole } from "../middleware/auth.js";
 
-const router = Router();
+const router = express.Router();
 
-router.post("/submit", protect, requireRole(["employee"]), submitAssessmentForm);
+router.post("/submit", protect, submitAssessmentForm);
+router.post("/trigger", protect, triggerAssessmentForms);
+router.get("/check-pending", protect, checkPendingForm);
 
-export default router; 
+export default router;

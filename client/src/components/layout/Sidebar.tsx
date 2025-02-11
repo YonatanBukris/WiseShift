@@ -24,13 +24,18 @@ export const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const isManager = user?.role === "manager";
 
   const menuItems = [
     { title: "סקירה כללית", icon: <DashboardIcon />, path: "/dashboard" },
     { title: "משימות", icon: <TasksIcon />, path: "/tasks" },
-    { title: "עובדים", icon: <EmployeesIcon />, path: "/employees" },
-    { title: "דוחות", icon: <ReportsIcon />, path: "/reports" },
-    { title: "מצב חירום", icon: <EmergencyIcon />, path: "/emergency" },
+    ...(isManager
+      ? [
+          { title: "עובדים", icon: <EmployeesIcon />, path: "/employees" },
+          { title: "דוחות", icon: <ReportsIcon />, path: "/reports" },
+          { title: "מצב חירום", icon: <EmergencyIcon />, path: "/emergency" },
+        ]
+      : []),
   ];
 
   return (
@@ -61,11 +66,15 @@ export const Sidebar = () => {
           WS
         </Avatar>
         <Typography variant="h6" color="primary.main">
-          ניהול משימות
+          אגף רווחה
         </Typography>
       </Box>
 
-      <Box sx={{ p: 2 }}>
+      <Box
+        sx={{ p: 2 }}
+        onClick={() => navigate("/profile")}
+        style={{ cursor: "pointer" }}
+      >
         <Box
           sx={{
             p: 1.5,
@@ -79,7 +88,7 @@ export const Sidebar = () => {
           <Avatar src={user?.name[0]} sx={{ width: 32, height: 32 }} />
           <Box>
             <Typography variant="subtitle2">{user?.name}</Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption">
               {user?.role === "manager" ? "מנהל" : "עובד"}
             </Typography>
           </Box>

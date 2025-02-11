@@ -10,6 +10,7 @@ import dashboardRoutes from "./routes/dashboardRoutes.js";
 import assessmentRoutes from "./routes/assessmentRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import emergencyRoutes from "./routes/emergencyRoutes.js";
+import fileRoutes from "./routes/fileRoutes.js";
 
 // Load env vars
 config();
@@ -36,6 +37,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/assessment", assessmentRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/emergency", emergencyRoutes);
+app.use("/api/files", fileRoutes);
 
 // Protected route example
 app.get("/api/test", protect, (req, res) => {
@@ -57,14 +59,21 @@ io.on("connection", (socket) => {
 });
 
 // Error handling middleware
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    message: "Internal server error",
-    error: process.env.NODE_ENV === "development" ? err.message : undefined,
-  });
-});
+app.use(
+  (
+    err: Error,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    console.error(err.stack);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: process.env.NODE_ENV === "development" ? err.message : undefined,
+    });
+  }
+);
 
 const PORT = process.env.PORT || 5000;
 
@@ -77,4 +86,4 @@ process.on("unhandledRejection", (err: Error) => {
   console.error("Unhandled Promise Rejection:", err);
   // Close server & exit process
   httpServer.close(() => process.exit(1));
-}); 
+});
