@@ -21,24 +21,18 @@ app.use(
 );
 app.use(express.json());
 
+// Then mount API routes
+app.use(routes);
+
 // Serve static files from the React app FIRST
-app.use(express.static(path.join(__dirname, "../../client/build")));
+const buildPath = path.resolve(__dirname, "../../client/build");
+console.log("Serving static files from:", buildPath);
+app.use(express.static(buildPath));
 
 // Handle React routing BEFORE API routes
 app.get("*", (req, res, next) => {
-  // Skip API routes
-  if (
-    req.url.startsWith("/auth") ||
-    req.url.startsWith("/tasks") ||
-    req.url.startsWith("/emergency")
-  ) {
-    return next();
-  }
   res.sendFile(path.join(__dirname, "../../client/build/index.html"));
 });
-
-// Then mount API routes
-app.use(routes);
 
 // Test endpoint
 app.get("/test", (_, res) => {
